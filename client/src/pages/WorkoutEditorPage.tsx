@@ -38,6 +38,16 @@ function SortableExercise({
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: item.id });
   const style = { transform: CSS.Transform.toString(transform), transition };
 
+  const [localSets, setLocalSets] = useState(item.sets);
+  const [localReps, setLocalReps] = useState(item.reps);
+  const [localNotes, setLocalNotes] = useState(item.notes || '');
+
+  useEffect(() => {
+    setLocalSets(item.sets);
+    setLocalReps(item.reps);
+    setLocalNotes(item.notes || '');
+  }, [item.sets, item.reps, item.notes]);
+
   return (
     <div ref={setNodeRef} style={style} className="bg-card rounded-2xl p-4 border border-border">
       <div className="flex items-start gap-3">
@@ -60,8 +70,9 @@ function SortableExercise({
               <input
                 type="number"
                 min={1}
-                value={item.sets}
-                onChange={(e) => onUpdate({ sets: parseInt(e.target.value) || 1 })}
+                value={localSets}
+                onChange={(e) => setLocalSets(parseInt(e.target.value) || 1)}
+                onBlur={() => onUpdate({ sets: localSets })}
                 className="w-full px-2 py-1.5 rounded-lg bg-secondary border border-border text-sm text-center"
               />
             </div>
@@ -69,8 +80,9 @@ function SortableExercise({
               <label className="text-[10px] text-muted-foreground uppercase">Reps</label>
               <input
                 type="text"
-                value={item.reps}
-                onChange={(e) => onUpdate({ reps: e.target.value })}
+                value={localReps}
+                onChange={(e) => setLocalReps(e.target.value)}
+                onBlur={() => onUpdate({ reps: localReps })}
                 className="w-full px-2 py-1.5 rounded-lg bg-secondary border border-border text-sm text-center"
                 placeholder="8-12"
               />
@@ -78,8 +90,9 @@ function SortableExercise({
           </div>
           <input
             type="text"
-            value={item.notes || ''}
-            onChange={(e) => onUpdate({ notes: e.target.value })}
+            value={localNotes}
+            onChange={(e) => setLocalNotes(e.target.value)}
+            onBlur={() => onUpdate({ notes: localNotes })}
             className="w-full px-2 py-1.5 rounded-lg bg-secondary border border-border text-xs"
             placeholder="Notes (optional)"
           />
