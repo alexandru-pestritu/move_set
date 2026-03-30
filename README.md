@@ -92,13 +92,13 @@ docker-compose up -d
 ### Pre-built image (from Docker Hub)
 
 ```bash
-docker pull yourdockerhubuser/moveset:latest
+docker pull alehh69/moveset:latest
 ```
 
 ## Unraid Deployment
 
 1. **Docker tab** → **Add Container**
-2. **Repository**: `yourdockerhubuser/moveset:latest`
+2. **Repository**: `alehh69/moveset:latest`
 3. **Port**: `3000` → `3000`
 4. **Volume**: `/mnt/user/appdata/moveset` → `/data`
 5. **Environment variables**: `MOVESET_USERNAME`, `MOVESET_PASSWORD`, `JWT_SECRET`

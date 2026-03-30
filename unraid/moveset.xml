@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <Container version="2">
   <Name>MoveSet</Name>
-  <Repository>alexandrupestritu/moveset:latest</Repository>
+  <Repository>alehh69/moveset:latest</Repository>
   <Registry>https://hub.docker.com/r/alehh69/moveset</Registry>
   <Branch>
     <Tag>latest</Tag>
