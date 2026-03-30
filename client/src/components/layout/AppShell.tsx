@@ -23,12 +23,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   if (isSessionActive) {
-    return <div className="min-h-screen bg-background">{children}</div>;
+    return <div className="min-h-screen bg-background" style={{ paddingTop: 'env(safe-area-inset-top)' }}>{children}</div>;
   }
 
   return (
     <div className="min-h-screen bg-background pb-20 md:pb-0">
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border" style={{ paddingTop: 'env(safe-area-inset-top)' }}>
         <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div
@@ -69,7 +69,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <main className="max-w-2xl mx-auto px-4 py-6">{children}</main>
 
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border safe-bottom md:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-t border-border md:hidden" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}>
         <div className="flex">
           {navItems.map(({ path, label, icon: Icon }) => (
             <button
