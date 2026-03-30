@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  moveset:
+    build: .
+    container_name: moveset
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    environment:
+      - MOVESET_USERNAME=${MOVESET_USERNAME:-admin}
+      - MOVESET_PASSWORD=${MOVESET_PASSWORD:-changeme}
+      - JWT_SECRET=${JWT_SECRET:-super-secret-change-me}
+      - PORT=3000
+      - DATA_DIR=/data
+      - GIF_DIR=/data/gifs
+      - PROXY_URL=${PROXY_URL:-}
+    volumes:
+      - moveset-data:/data
+
+volumes:
+  moveset-data:
+    driver: local
