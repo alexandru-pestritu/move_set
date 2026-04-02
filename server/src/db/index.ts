@@ -63,6 +63,28 @@ export function initializeDatabase() {
     );
   `);
 
+  // Non-breaking migrations: add new columns/tables if they don't exist
+  const cols = sqlite.prepare(`PRAGMA table_info(workout_sessions)`).all() as any[];
+  const colNames = cols.map((c: any) => c.name);
+
+  if (!colNames.includes('paused_at')) {
+    sqlite.exec(`ALTER TABLE workout_sessions ADD COLUMN paused_at TEXT`);
+  }
+  if (!colNames.includes('total_paused_seconds')) {
+    sqlite.exec(`ALTER TABLE workout_sessions ADD COLUMN total_paused_seconds INTEGER NOT NULL DEFAULT 0`);
+  }
+
+  sqlite.exec(`
+    CREATE TABLE IF NOT EXISTS workout_schedules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      workout_id INTEGER NOT NULL REFERENCES workouts(id) ON DELETE CASCADE,
+      type TEXT NOT NULL,
+      day_of_week INTEGER,
+      specific_date TEXT,
+      created_at TEXT NOT NULL
+    );
+  `);
+
   if (!fs.existsSync(config.gifDir)) {
     fs.mkdirSync(config.gifDir, { recursive: true });
   }

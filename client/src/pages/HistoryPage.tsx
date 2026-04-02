@@ -69,7 +69,7 @@ export default function HistoryPage() {
                   </span>
                   {s.completedAt && (
                     <span className="text-xs text-muted-foreground">
-                      {formatDuration(s.startedAt, s.completedAt)}
+                      {formatDuration(s.startedAt, s.completedAt, s.totalPausedSeconds || 0)}
                     </span>
                   )}
                   {!s.completedAt && (

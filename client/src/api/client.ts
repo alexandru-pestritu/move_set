@@ -52,12 +52,12 @@ export const api = {
   workouts: {
     list: () => request<any[]>('/workouts'),
     get: (id: number) => request<any>(`/workouts/${id}`),
-    create: (data: { name: string; muscleGroups: string }) =>
+    create: (data: { name: string }) =>
       request<any>('/workouts', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: number, data: { name?: string; muscleGroups?: string }) =>
+    update: (id: number, data: { name?: string }) =>
       request<any>(`/workouts/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -97,8 +97,25 @@ export const api = {
       request<any>(`/sessions/${sessionId}/exercises/${seId}`, { method: 'PUT' }),
     complete: (sessionId: number) =>
       request<any>(`/sessions/${sessionId}/complete`, { method: 'PUT' }),
+    pause: (sessionId: number) =>
+      request<any>(`/sessions/${sessionId}/pause`, { method: 'PUT' }),
+    resume: (sessionId: number) =>
+      request<any>(`/sessions/${sessionId}/resume`, { method: 'PUT' }),
     delete: (sessionId: number) =>
       request<{ ok: boolean }>(`/sessions/${sessionId}`, { method: 'DELETE' }),
     stats: () => request<any>('/sessions/stats/overview'),
+  },
+
+  schedules: {
+    list: (workoutId?: number) =>
+      request<any[]>(workoutId ? `/schedules?workoutId=${workoutId}` : '/schedules'),
+    upcoming: () => request<any[]>('/schedules/upcoming'),
+    create: (data: { workoutId: number; type: string; dayOfWeek?: number; specificDate?: string }) =>
+      request<any>('/schedules', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: number) =>
+      request<{ ok: boolean }>(`/schedules/${id}`, { method: 'DELETE' }),
   },
 };

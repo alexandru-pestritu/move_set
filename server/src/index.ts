@@ -10,6 +10,7 @@ import exerciseRoutes from './routes/exercises';
 import workoutRoutes from './routes/workouts';
 import sessionRoutes from './routes/sessions';
 import gifRoutes from './routes/gifs';
+import scheduleRoutes from './routes/schedules';
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use('/api/gifs', gifRoutes);
 app.use('/api/exercises', authMiddleware, exerciseRoutes);
 app.use('/api/workouts', authMiddleware, workoutRoutes);
 app.use('/api/sessions', authMiddleware, sessionRoutes);
+app.use('/api/schedules', authMiddleware, scheduleRoutes);
 
 const publicDir = path.join(__dirname, '..', 'public');
 app.use(express.static(publicDir));

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import { Plus, Dumbbell, MoreVertical, Copy, Trash2, Play } from 'lucide-react';
+import { Plus, Dumbbell, MoreVertical, Copy, Trash2, Play, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { getMuscleGroupColor, parseMuscleGroups } from '../lib/muscleGroups';
@@ -15,6 +15,11 @@ export default function WorkoutsPage() {
   const { data: workouts, isLoading } = useQuery({
     queryKey: ['workouts'],
     queryFn: api.workouts.list,
+  });
+
+  const { data: upcoming } = useQuery({
+    queryKey: ['schedules-upcoming'],
+    queryFn: api.schedules.upcoming,
   });
 
   const deleteMutation = useMutation({
@@ -61,6 +66,34 @@ export default function WorkoutsPage() {
           New
         </button>
       </div>
+
+      {upcoming && upcoming.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+            <CalendarDays size={14} /> Upcoming
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {upcoming.slice(0, 7).map((item: any, idx: number) => {
+              const d = new Date(item.date + 'T00:00:00');
+              const isToday = item.date === new Date().toISOString().split('T')[0];
+              return (
+                <button
+                  key={`${item.scheduleId}-${item.date}-${idx}`}
+                  onClick={() => navigate(`/workouts/${item.workoutId}`)}
+                  className={`flex-shrink-0 w-28 bg-card rounded-xl p-3 border text-left transition ${
+                    isToday ? 'border-primary/40 bg-primary/5' : 'border-border hover:border-primary/20'
+                  }`}
+                >
+                  <p className={`text-[10px] font-semibold uppercase ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {isToday ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                  </p>
+                  <p className="text-xs font-semibold truncate mt-0.5">{item.workoutName}</p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {!workouts || workouts.length === 0 ? (
         <div className="text-center py-20 space-y-4">

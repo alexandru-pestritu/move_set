@@ -22,7 +22,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import GifModal from '../components/GifModal';
-import MuscleGroupPicker from '../components/MuscleGroupPicker';
+import SchedulePicker from '../components/SchedulePicker';
 
 function SortableExercise({
   item,
@@ -112,7 +112,6 @@ export default function WorkoutEditorPage() {
   const isNew = !id;
 
   const [name, setName] = useState('');
-  const [muscleGroups, setMuscleGroups] = useState('');
   const [scrapeUrl, setScrapeUrl] = useState('');
   const [scraping, setScraping] = useState(false);
   const [showExercisePicker, setShowExercisePicker] = useState(false);
@@ -132,12 +131,11 @@ export default function WorkoutEditorPage() {
   useEffect(() => {
     if (workout) {
       setName(workout.name);
-      setMuscleGroups(workout.muscleGroups || '');
     }
   }, [workout]);
 
   const createWorkout = useMutation({
-    mutationFn: (data: { name: string; muscleGroups: string }) => api.workouts.create(data),
+    mutationFn: (data: { name: string }) => api.workouts.create(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
       navigate(`/workouts/${data.id}/edit`, { replace: true });
@@ -147,7 +145,7 @@ export default function WorkoutEditorPage() {
   });
 
   const updateWorkout = useMutation({
-    mutationFn: (data: { name?: string; muscleGroups?: string }) => api.workouts.update(Number(id), data),
+    mutationFn: (data: { name?: string }) => api.workouts.update(Number(id), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workout', id] });
       queryClient.invalidateQueries({ queryKey: ['workouts'] });
@@ -222,7 +220,7 @@ export default function WorkoutEditorPage() {
       toast.error('Name is required');
       return;
     }
-    createWorkout.mutate({ name: name.trim(), muscleGroups: muscleGroups.trim() });
+    createWorkout.mutate({ name: name.trim() });
   };
 
   const handleSave = () => {
@@ -230,7 +228,7 @@ export default function WorkoutEditorPage() {
       toast.error('Name is required');
       return;
     }
-    updateWorkout.mutate({ name: name.trim(), muscleGroups: muscleGroups.trim() });
+    updateWorkout.mutate({ name: name.trim() });
     toast.success('Workout saved');
   };
 
@@ -257,11 +255,6 @@ export default function WorkoutEditorPage() {
             placeholder="e.g. Push Day"
           />
         </div>
-        <div className="space-y-2">
-          <label className="text-sm font-medium text-muted-foreground">Muscle Groups</label>
-          <MuscleGroupPicker value={muscleGroups} onChange={setMuscleGroups} />
-        </div>
-
         {isNew ? (
           <button
             onClick={handleCreate}
@@ -312,6 +305,13 @@ export default function WorkoutEditorPage() {
                 </SortableContext>
               </DndContext>
             )}
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Schedule
+            </h3>
+            <SchedulePicker workoutId={Number(id)} />
           </div>
 
           {showExercisePicker && (

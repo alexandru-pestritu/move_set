@@ -6,11 +6,24 @@ import { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
+function getWorkoutMuscleGroups(workoutId: number): string {
+  const wExs = db.select().from(workoutExercises).where(eq(workoutExercises.workoutId, workoutId)).all();
+  const muscles = new Set<string>();
+  for (const we of wExs) {
+    const ex = db.select().from(exercises).where(eq(exercises.id, we.exerciseId)).get();
+    if (ex?.primaryMuscle) {
+      ex.primaryMuscle.split(',').map((m: string) => m.trim()).filter(Boolean).forEach((m: string) => muscles.add(m));
+    }
+  }
+  return [...muscles].join(', ');
+}
+
 router.get('/', (_req: AuthRequest, res: Response) => {
   const all = db.select().from(workouts).all();
   const result = all.map((w) => {
     const exCount = db.select().from(workoutExercises).where(eq(workoutExercises.workoutId, w.id)).all().length;
-    return { ...w, exerciseCount: exCount };
+    const muscleGroups = getWorkoutMuscleGroups(w.id);
+    return { ...w, muscleGroups, exerciseCount: exCount };
   });
   return res.json(result);
 });
@@ -33,7 +46,8 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
     return { ...we, exercise };
   });
 
-  return res.json({ ...workout, exercises: exercisesWithDetails });
+  const muscleGroups = getWorkoutMuscleGroups(workout.id);
+  return res.json({ ...workout, muscleGroups, exercises: exercisesWithDetails });
 });
 
 router.post('/', (req: AuthRequest, res: Response) => {

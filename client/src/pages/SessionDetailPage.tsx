@@ -57,7 +57,7 @@ export default function SessionDetailPage() {
         </div>
         <div className="flex-1 bg-card rounded-2xl p-4 border border-border text-center">
           <p className="text-2xl font-bold">
-            {session.completedAt ? formatDuration(session.startedAt, session.completedAt) : '--'}
+            {session.completedAt ? formatDuration(session.startedAt, session.completedAt, session.totalPausedSeconds || 0) : '--'}
           </p>
           <p className="text-xs text-muted-foreground mt-1">Duration</p>
         </div>

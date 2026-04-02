@@ -116,6 +116,50 @@ router.put('/:id/exercises/:seId', (req: AuthRequest, res: Response) => {
   return res.json(updated);
 });
 
+router.put('/:id/pause', (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  const session = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+  if (session.pausedAt) {
+    return res.status(400).json({ error: 'Session is already paused' });
+  }
+  if (session.completedAt) {
+    return res.status(400).json({ error: 'Session is already completed' });
+  }
+
+  db.update(workoutSessions).set({
+    pausedAt: new Date().toISOString(),
+  }).where(eq(workoutSessions.id, id)).run();
+
+  const updated = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
+  return res.json(updated);
+});
+
+router.put('/:id/resume', (req: AuthRequest, res: Response) => {
+  const id = parseInt(req.params.id as string);
+  const session = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found' });
+  }
+  if (!session.pausedAt) {
+    return res.status(400).json({ error: 'Session is not paused' });
+  }
+
+  const pauseStart = new Date(session.pausedAt).getTime();
+  const pauseEnd = Date.now();
+  const pausedSeconds = Math.floor((pauseEnd - pauseStart) / 1000);
+
+  db.update(workoutSessions).set({
+    pausedAt: null,
+    totalPausedSeconds: (session.totalPausedSeconds || 0) + pausedSeconds,
+  }).where(eq(workoutSessions.id, id)).run();
+
+  const updated = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
+  return res.json(updated);
+});
+
 router.put('/:id/complete', (req: AuthRequest, res: Response) => {
   const id = parseInt(req.params.id as string);
   const session = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
@@ -123,8 +167,17 @@ router.put('/:id/complete', (req: AuthRequest, res: Response) => {
     return res.status(404).json({ error: 'Session not found' });
   }
 
+  // If paused, accumulate remaining pause time before completing
+  let totalPaused = session.totalPausedSeconds || 0;
+  if (session.pausedAt) {
+    const pauseStart = new Date(session.pausedAt).getTime();
+    totalPaused += Math.floor((Date.now() - pauseStart) / 1000);
+  }
+
   db.update(workoutSessions).set({
     completedAt: new Date().toISOString(),
+    pausedAt: null,
+    totalPausedSeconds: totalPaused,
   }).where(eq(workoutSessions.id, id)).run();
 
   const updated = db.select().from(workoutSessions).where(eq(workoutSessions.id, id)).get();
@@ -178,11 +231,17 @@ router.get('/stats/overview', (_req: AuthRequest, res: Response) => {
   const muscleMap: Record<string, number> = {};
   for (const s of allSessions) {
     if (!s.completedAt) continue;
-    const workout = db.select().from(workouts).where(eq(workouts.id, s.workoutId)).get();
-    if (workout?.muscleGroups) {
-      const groups = workout.muscleGroups.split(',').map((g: string) => g.trim()).filter(Boolean);
-      for (const g of groups) {
-        muscleMap[g] = (muscleMap[g] || 0) + 1;
+    const sessEx = db.select().from(sessionExercises).where(eq(sessionExercises.sessionId, s.id)).all();
+    for (const se of sessEx) {
+      const we = db.select().from(workoutExercises).where(eq(workoutExercises.id, se.workoutExerciseId)).get();
+      if (we) {
+        const ex = db.select().from(exercises).where(eq(exercises.id, we.exerciseId)).get();
+        if (ex?.primaryMuscle) {
+          const groups = ex.primaryMuscle.split(',').map((g: string) => g.trim()).filter(Boolean);
+          for (const g of groups) {
+            muscleMap[g] = (muscleMap[g] || 0) + 1;
+          }
+        }
       }
     }
   }

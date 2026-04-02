@@ -34,6 +34,17 @@ export const workoutSessions = sqliteTable('workout_sessions', {
   workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
   startedAt: text('started_at').notNull(),
   completedAt: text('completed_at'),
+  pausedAt: text('paused_at'),
+  totalPausedSeconds: integer('total_paused_seconds').notNull().default(0),
+});
+
+export const workoutSchedules = sqliteTable('workout_schedules', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  workoutId: integer('workout_id').notNull().references(() => workouts.id, { onDelete: 'cascade' }),
+  type: text('type').notNull(), // 'once' | 'weekly'
+  dayOfWeek: integer('day_of_week'), // 0=Sun, 1=Mon, ..., 6=Sat (for weekly)
+  specificDate: text('specific_date'), // ISO date 'YYYY-MM-DD' (for once)
+  createdAt: text('created_at').notNull(),
 });
 
 export const sessionExercises = sqliteTable('session_exercises', {
